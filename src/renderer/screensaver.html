@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Affirmation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000;
+      cursor: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #affirmation-image {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    #loading {
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading affirmation...</div>
+  <img id="affirmation-image" style="display: none;">
+  
+  <script>
+    const { ipcRenderer } = require('electron');
+    const path = require('path');
+    
+    async function loadImage() {
+      try {
+        const imagePath = await ipcRenderer.invoke('get-current-image');
+        
+        if (imagePath) {
+          const img = document.getElementById('affirmation-image');
+          const loading = document.getElementById('loading');
+          
+          // Convert file path to file:// URL
+          img.src = 'file://' + imagePath;
+          
+          img.onload = () => {
+            loading.style.display = 'none';
+            img.style.display = 'block';
+          };
+          
+          img.onerror = () => {
+            loading.textContent = 'No affirmation generated yet. Generate one from the tray menu!';
+          };
+        } else {
+          document.getElementById('loading').textContent = 'No affirmation generated yet. Generate one from the tray menu!';
+        }
+      } catch (error) {
+        document.getElementById('loading').textContent = 'Error loading affirmation';
+        console.error(error);
+      }
+    }
+    
+    // Close screensaver on any input
+    document.addEventListener('keydown', () => window.close());
+    document.addEventListener('mousemove', () => window.close());
+    document.addEventListener('click', () => window.close());
+    
+    loadImage();
+  </script>
+</body>
+</html>
