@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Welcome to Affirmation Screensaver</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 40px;
+      border-radius: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #667eea;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .question {
+      margin-bottom: 25px;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #444;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 14px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+    }
+    .checkbox-item input {
+      margin-right: 8px;
+    }
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    .help-text {
+      font-size: 12px;
+      color: #888;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌟 Welcome!</h1>
+    <p class="subtitle">Let's personalize your affirmations</p>
+    
+    <form id="onboarding-form">
+      <div class="question">
+        <label for="goals">What are your main goals right now?</label>
+        <textarea id="goals" placeholder="E.g., Advance my career, improve relationships, be healthier..."></textarea>
+        <div class="help-text">Share what matters most to you</div>
+      </div>
+      
+      <div class="question">
+        <label>Which areas would you like to build confidence in?</label>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="area-career" value="Career & Work">
+            <label for="area-career" style="margin: 0; font-weight: normal;">Career & Work</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="area-relationships" value="Relationships">
+            <label for="area-relationships" style="margin: 0; font-weight: normal;">Relationships</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="area-health" value="Health & Fitness">
+            <label for="area-health" style="margin: 0; font-weight: normal;">Health & Fitness</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="area-creativity" value="Creativity">
+            <label for="area-creativity" style="margin: 0; font-weight: normal;">Creativity</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="area-finance" value="Financial Success">
+            <label for="area-finance" style="margin: 0; font-weight: normal;">Financial Success</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="area-self" value="Self-Worth">
+            <label for="area-self" style="margin: 0; font-weight: normal;">Self-Worth</label>
+          </div>
+        </div>
+      </div>
+      
+      <div class="question">
+        <label for="schedule">How often should new affirmations generate?</label>
+        <select id="schedule">
+          <option value="0 6 * * *">Daily at 6:00 AM</option>
+          <option value="0 */12 * * *">Every 12 hours</option>
+          <option value="0 */6 * * *">Every 6 hours</option>
+          <option value="0 */3 * * *">Every 3 hours</option>
+          <option value="0 * * * *">Every hour</option>
+        </select>
+        <div class="help-text">Fresh affirmations help keep you motivated</div>
+      </div>
+      
+      <button type="submit">Generate My First Affirmation ✨</button>
+    </form>
+  </div>
+  
+  <script>
+    const { ipcRenderer } = require('electron');
+    
+    document.getElementById('onboarding-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const goals = document.getElementById('goals').value;
+      const schedule = document.getElementById('schedule').value;
+      
+      // Get selected confidence areas
+      const areas = [];
+      document.querySelectorAll('.checkbox-item input:checked').forEach(checkbox => {
+        areas.push(checkbox.value);
+      });
+      
+      if (!goals.trim()) {
+        alert('Please share at least one goal');
+        return;
+      }
+      
+      if (areas.length === 0) {
+        alert('Please select at least one confidence area');
+        return;
+      }
+      
+      // Disable button and show loading
+      const button = e.target.querySelector('button');
+      button.disabled = true;
+      button.textContent = 'Generating your first affirmation... 🎨';
+      
+      try {
+        await ipcRenderer.invoke('save-onboarding', {
+          goals: goals.split(',').map(g => g.trim()).filter(g => g),
+          areas,
+          schedule
+        });
+        
+        alert('Your first affirmation has been generated! Check your system tray.');
+        window.close();
+      } catch (error) {
+        alert('Error: ' + error.message);
+        button.disabled = false;
+        button.textContent = 'Generate My First Affirmation ✨';
+      }
+    });
+  </script>
+</body>
+</html>
