@@ -11,19 +11,18 @@ function createTray(callbacks) {
   
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: 'Affirmation Screensaver',
+      label: 'Affirmation Wallpaper',
       enabled: false
     },
     { type: 'separator' },
     {
-      label: 'Preview Screensaver',
-      click: callbacks.onPreview
+      label: 'Apply Current Wallpaper',
+      click: callbacks.onApplyWallpaper
     },
     {
       label: 'Generate New Affirmation',
       click: async () => {
-        const { ipcMain } = require('electron');
-        // Trigger generation
+        // Trigger generation which will automatically set as wallpaper
         const result = await require('./main').handleGenerateAffirmation?.();
         console.log('Manual generation triggered:', result);
       }
@@ -40,7 +39,7 @@ function createTray(callbacks) {
     }
   ]);
   
-  tray.setToolTip('Affirmation Screensaver');
+  tray.setToolTip('Affirmation Wallpaper');
   tray.setContextMenu(contextMenu);
   
   return tray;
