@@ -17,7 +17,6 @@ An AI-powered desktop screensaver that generates personalized affirmation images
 
 - Node.js 18+ installed
 - OpenRouter API key ([Get one here](https://openrouter.ai/))
-- Google AI Studio API key for Gemini 2.5 Flash ([Get one here](https://aistudio.google.com/app/apikey))
 
 ### Installation
 
@@ -32,9 +31,8 @@ npm install
 # Create .env file
 cp .env.example .env
 
-# Add your API keys to .env
+# Add your API key to .env
 # OPENROUTER_API_KEY=your_openrouter_key
-# GEMINI_API_KEY=your_gemini_key
 
 # Run the app
 npm start
@@ -52,7 +50,7 @@ npm start
 
 1. **Onboarding**: You answer questions about areas you want to improve (career, relationships, health, etc.)
 2. **Prompt Generation**: OpenRouter generates multiple affirmation prompts based on your goals
-3. **Image Creation**: Gemini 2.5 Flash creates beautiful images with affirmation text overlays
+3. **Image Creation**: OpenRouter (Gemini 2.5 Flash Image) creates beautiful images with affirmation text overlays in 16:9 aspect ratio
 4. **Auto-Rotation**: New affirmations are generated on your schedule
 5. **Display**: Images rotate as your desktop wallpaper/screensaver
 
@@ -64,7 +62,6 @@ Create a `.env` file in the root directory:
 
 ```env
 OPENROUTER_API_KEY=your_openrouter_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ### Generation Schedule
@@ -114,13 +111,11 @@ npm run build:linux  # Linux
 
 ## 📝 API Usage
 
-### OpenRouter (Text Generation)
+### OpenRouter
 
-Used to generate contextual affirmation prompts based on user goals.
-
-### Gemini 2.5 Flash via Nano Banana
-
-Generates images with text overlay. The model is smart enough to include affirmation text directly in the image.
+Used for both:
+- **Text Generation**: Generate contextual affirmation prompts based on user goals
+- **Image Generation**: Generate beautiful images with affirmation text overlays using `google/gemini-2.5-flash-image` model with 16:9 aspect ratio support (1344×768 resolution)
 
 ## 🤝 Contributing
 
@@ -136,7 +131,7 @@ MIT License - see LICENSE file for details
 ## 🙏 Credits
 
 - Inspired by [before-dawn](https://github.com/muffinista/before-dawn)
-- Powered by OpenRouter and Google Gemini
+- Powered by OpenRouter (Gemini 2.5 Flash Image model)
 
 ---
 

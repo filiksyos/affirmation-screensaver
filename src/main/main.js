@@ -116,8 +116,7 @@ ipcMain.handle('get-settings', async () => {
     areas: store.get('confidenceAreas', []),
     schedule: store.get('generationSchedule', '0 6 * * *'),
     apiKeys: {
-      openrouter: !!process.env.OPENROUTER_API_KEY,
-      gemini: !!process.env.GEMINI_API_KEY
+      openrouter: !!process.env.OPENROUTER_API_KEY
     }
   };
 });
@@ -154,7 +153,7 @@ async function handleGenerateAffirmation() {
     console.log('Generating affirmation prompts...');
     const prompts = await generateAffirmations(goals, areas);
     
-    // Step 2: Generate image using Gemini 2.5 Flash for first prompt
+    // Step 2: Generate image using OpenRouter (Gemini 2.5 Flash Image) for first prompt
     console.log('Generating image with affirmation...');
     const imagePath = await generateImage(prompts[0]);
     
