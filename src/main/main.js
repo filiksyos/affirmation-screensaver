@@ -99,6 +99,9 @@ app.whenReady().then(() => {
     }
   });
 
+  // Check if running in dev mode
+  const isDevMode = process.argv.includes('--dev');
+
   // Show onboarding if first run
   if (isFirstRun) {
     mainWindow = createOnboardingWindow();
@@ -106,6 +109,11 @@ app.whenReady().then(() => {
     // Initialize scheduler with saved settings
     const schedule = store.get('generationSchedule', '0 6 * * *');
     initScheduler(schedule);
+    
+    // In dev mode, show settings window automatically
+    if (isDevMode) {
+      createSettingsWindow();
+    }
   }
 });
 

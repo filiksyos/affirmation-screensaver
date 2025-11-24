@@ -4,9 +4,8 @@ const path = require('path');
 require('dotenv').config();
 
 /**
- * Generate image using Gemini 2.5 Flash (Imagen 3) via Google AI Studio
- * Note: As of knowledge cutoff, using Google's generative AI API
- * If Nano Banana is a specific service, replace the endpoint accordingly
+ * Generate image using Gemini 2.5 Flash Image Preview via Google AI Studio
+ * Uses the same API approach as nano-banana-wardrobe
  * @param {string} prompt - Image generation prompt with affirmation
  * @returns {string} - Path to saved image
  */
@@ -21,48 +20,88 @@ async function generateImage(prompt) {
   const imagesDir = path.join(process.cwd(), 'generated-images');
   await fs.mkdir(imagesDir, { recursive: true });
   
-  try {
-    // Using Google's Imagen 3 via AI Studio API
-    // Note: This endpoint may need adjustment based on actual Nano Banana/Gemini 2.5 Flash API
-    const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:predict?key=${apiKey}`,
-      {
-        instances: [
-          {
-            prompt: prompt
-          }
-        ],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: '16:9', // Good for desktop wallpaper
-          negativePrompt: 'blurry, low quality, distorted text, unreadable',
-          safetyFilterLevel: 'block_few'
+  // Use the same endpoint as nano-banana-wardrobe
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+  
+  // Format request similar to nano-banana-wardrobe but with text-only prompt
+  const payload = {
+    contents: [{
+      parts: [
+        { text: prompt }
+      ],
+    }],
+    generationConfig: {
+      responseModalities: ['IMAGE'],
+    },
+  };
+
+  let response;
+  // Retry logic similar to nano-banana-wardrobe
+  for (let i = 0; i < 3; i++) {
+    try {
+      response = await axios.post(
+        apiUrl,
+        payload,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          timeout: 60000 // 60 second timeout for image generation
         }
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        timeout: 60000 // 60 second timeout for image generation
+      );
+      
+      if (response.status === 200) {
+        break;
+      } else if (response.status === 429) {
+        // Rate limit - exponential backoff
+        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+        console.log(`Rate limited, retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      } else {
+        throw new Error(`API error: ${response.status}`);
       }
-    );
-    
-    // Extract image data (base64)
-    const imageData = response.data.predictions[0].bytesBase64Encoded;
+    } catch (error) {
+      if (i === 2) {
+        // Last retry failed
+        console.error('Error generating image after retries:', error.response?.data || error.message);
+        // Fallback: Create a simple placeholder image with text
+        return await createFallbackImage(prompt, imagesDir);
+      }
+      // Continue to retry
+      if (error.response?.status === 429) {
+        const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  // Check if we have a valid response
+  if (!response || !response.data) {
+    console.error('No valid response received after retries');
+    return await createFallbackImage(prompt, imagesDir);
+  }
+
+  try {
+    // Parse response similar to nano-banana-wardrobe
+    const result = response.data;
+    const base64Data = result?.candidates?.[0]?.content?.parts?.find((p) => p.inlineData)?.inlineData?.data;
+
+    if (!base64Data) {
+      throw new Error('No image data in response');
+    }
     
     // Save image
     const timestamp = Date.now();
     const filename = `affirmation-${timestamp}.png`;
     const filepath = path.join(imagesDir, filename);
     
-    await fs.writeFile(filepath, Buffer.from(imageData, 'base64'));
+    await fs.writeFile(filepath, Buffer.from(base64Data, 'base64'));
     
     console.log('Image saved to:', filepath);
     return filepath;
     
   } catch (error) {
-    console.error('Error generating image:', error.response?.data || error.message);
-    
+    console.error('Error processing image response:', error.message);
     // Fallback: Create a simple placeholder image with text
     return await createFallbackImage(prompt, imagesDir);
   }

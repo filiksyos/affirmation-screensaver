@@ -39,7 +39,7 @@ Generate 3 unique prompts now:`;
     const response = await axios.post(
       'https://openrouter.ai/api/v1/chat/completions',
       {
-        model: 'meta-llama/llama-3.1-8b-instruct:free', // Free model for MVP
+        model: 'openai/gpt-4.1-mini',
         messages: [
           {
             role: 'user',
