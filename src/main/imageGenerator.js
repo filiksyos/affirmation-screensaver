@@ -4,8 +4,8 @@ const path = require('path');
 require('dotenv').config();
 
 /**
- * Generate image using Gemini 2.5 Flash Image Preview via Google AI Studio
- * Uses the same API approach as nano-banana-wardrobe
+ * Generate image using Gemini 3 Pro Image Preview via Google AI Studio
+ * Uses proper imageConfig for aspect ratio control
  * @param {string} prompt - Image generation prompt with affirmation
  * @returns {string} - Path to saved image
  */
@@ -20,10 +20,10 @@ async function generateImage(prompt) {
   const imagesDir = path.join(process.cwd(), 'generated-images');
   await fs.mkdir(imagesDir, { recursive: true });
   
-  // Use the same endpoint as nano-banana-wardrobe
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+  // Use Gemini 3 Pro Image Preview model with proper aspect ratio configuration
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`;
   
-  // Format request similar to nano-banana-wardrobe but with text-only prompt
+  // Format request with proper imageConfig for 16:9 aspect ratio
   const payload = {
     contents: [{
       parts: [
@@ -32,6 +32,10 @@ async function generateImage(prompt) {
     }],
     generationConfig: {
       responseModalities: ['IMAGE'],
+      imageConfig: {
+        aspectRatio: '16:9',
+        imageSize: '2K' // Options: '1K', '2K', '4K' - 2K gives good quality for wallpapers
+      }
     },
   };
 

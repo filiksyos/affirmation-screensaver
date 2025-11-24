@@ -24,14 +24,15 @@ User's goals: ${goalsText}
 
 Generate 3 different affirmation image prompts. Each prompt should:
 1. Include a short, powerful affirmation text (5-8 words max)
-2. Describe a beautiful, uplifting visual scene
+2. Describe a beautiful, uplifting visual scene optimized for 16:9 widescreen aspect ratio (PC wallpaper format)
 3. Specify where the affirmation text should appear in the image
-4. Use inspiring, motivational imagery
+4. Use inspiring, motivational imagery that works well in landscape/widescreen format
+5. IMPORTANT: The image must be generated in 16:9 aspect ratio (1920x1080 or similar widescreen dimensions) suitable for desktop wallpaper
 
 Format each prompt as:
-"[AFFIRMATION TEXT]: [Visual scene description with text placement]"
+"[AFFIRMATION TEXT]: [Visual scene description with text placement, optimized for 16:9 widescreen wallpaper format]"
 
-Example: "I Am Confident and Capable: A serene mountain peak at sunrise with golden light, the affirmation text elegantly overlaid in the sky in bold white letters"
+Example: "I Am Confident and Capable: A serene mountain peak at sunrise with golden light spanning across a wide 16:9 landscape, the affirmation text elegantly overlaid in the sky in bold white letters, perfect for desktop wallpaper"
 
 Generate 3 unique prompts now:`;
   
