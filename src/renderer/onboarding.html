@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Welcome to Affirmation Screensaver</title>
+  <title>Welcome to Affirmation Wallpaper</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     body {
@@ -141,6 +141,7 @@
       <div class="question">
         <label for="schedule">How often should new affirmations generate?</label>
         <select id="schedule">
+          <option value="*/5 * * * *">Every 5 minutes (for testing)</option>
           <option value="0 6 * * *">Daily at 6:00 AM</option>
           <option value="0 */12 * * *">Every 12 hours</option>
           <option value="0 */6 * * *">Every 6 hours</option>
@@ -191,7 +192,7 @@
           schedule
         });
         
-        alert('Your first affirmation has been generated! Check your system tray.');
+        alert('Your first affirmation wallpaper has been set! Check your system tray for more options.');
         window.close();
       } catch (error) {
         alert('Error: ' + error.message);

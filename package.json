@@ -1,8 +1,8 @@
 {
-  "name": "affirmation-screensaver",
-  "productName": "Affirmation Screensaver",
+  "name": "affirmation-wallpaper",
+  "productName": "Affirmation Wallpaper",
   "version": "0.1.0",
-  "description": "AI-powered affirmation screensaver that generates personalized motivational images",
+  "description": "AI-powered affirmation wallpaper that generates personalized motivational desktop backgrounds",
   "author": "Your Name",
   "license": "MIT",
   "main": "src/main/main.js",
@@ -18,15 +18,16 @@
     "axios": "^1.6.0",
     "dotenv": "^17.2.3",
     "electron-store": "^8.1.0",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "wallpaper": "^7.2.1"
   },
   "devDependencies": {
     "electron": "28.3.3",
     "electron-builder": "^24.9.1"
   },
   "build": {
-    "appId": "com.affirmation.screensaver",
-    "productName": "Affirmation Screensaver",
+    "appId": "com.affirmation.wallpaper",
+    "productName": "Affirmation Wallpaper",
     "files": [
       "src/**/*",
       "assets/**/*",

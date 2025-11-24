@@ -5,13 +5,13 @@ const { createTray } = require('./tray');
 const { initScheduler, stopScheduler } = require('./scheduler');
 const { generateAffirmations } = require('./affirmationGenerator');
 const { generateImage } = require('./imageGenerator');
+const { setWallpaper } = require('./wallpaperSetter');
 
 // Initialize electron-store for persistent settings
 const store = new Store();
 
 let mainWindow = null;
 let settingsWindow = null;
-let screensaverWindow = null;
 let tray = null;
 
 // Check if this is first run
@@ -56,48 +56,28 @@ function createSettingsWindow() {
   });
 }
 
-function createScreensaverWindow() {
-  const { screen } = require('electron');
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width, height } = primaryDisplay.bounds;
-
-  screensaverWindow = new BrowserWindow({
-    width,
-    height,
-    fullscreen: true,
-    frame: false,
-    kiosk: true,
-    alwaysOnTop: true,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
-    }
-  });
-
-  screensaverWindow.loadFile(path.join(__dirname, '../renderer/screensaver.html'));
-  
-  // Close screensaver on any mouse/keyboard activity
-  screensaverWindow.on('blur', () => {
-    if (screensaverWindow) {
-      screensaverWindow.close();
-    }
-  });
-
-  screensaverWindow.on('closed', () => {
-    screensaverWindow = null;
-  });
+async function applyCurrentWallpaper() {
+  const currentImage = store.get('currentImagePath', null);
+  if (currentImage) {
+    await setWallpaper(currentImage);
+  } else {
+    console.log('No wallpaper image available yet');
+  }
 }
 
 app.whenReady().then(() => {
   // Create system tray
   tray = createTray({
     onSettings: createSettingsWindow,
-    onPreview: createScreensaverWindow,
+    onApplyWallpaper: applyCurrentWallpaper,
     onQuit: () => {
       stopScheduler();
       app.quit();
     }
   });
+
+  // Check if running in dev mode
+  const isDevMode = process.argv.includes('--dev');
 
   // Show onboarding if first run
   if (isFirstRun) {
@@ -106,6 +86,11 @@ app.whenReady().then(() => {
     // Initialize scheduler with saved settings
     const schedule = store.get('generationSchedule', '0 6 * * *');
     initScheduler(schedule);
+    
+    // In dev mode, show settings window automatically
+    if (isDevMode) {
+      createSettingsWindow();
+    }
   }
 });
 
@@ -131,8 +116,7 @@ ipcMain.handle('get-settings', async () => {
     areas: store.get('confidenceAreas', []),
     schedule: store.get('generationSchedule', '0 6 * * *'),
     apiKeys: {
-      openrouter: !!process.env.OPENROUTER_API_KEY,
-      gemini: !!process.env.GEMINI_API_KEY
+      openrouter: !!process.env.OPENROUTER_API_KEY
     }
   };
 });
@@ -169,12 +153,16 @@ async function handleGenerateAffirmation() {
     console.log('Generating affirmation prompts...');
     const prompts = await generateAffirmations(goals, areas);
     
-    // Step 2: Generate image using Gemini 2.5 Flash for first prompt
+    // Step 2: Generate image using OpenRouter (Gemini 2.5 Flash Image) for first prompt
     console.log('Generating image with affirmation...');
     const imagePath = await generateImage(prompts[0]);
     
     // Step 3: Save to store
     store.set('currentImagePath', imagePath);
+    
+    // Step 4: Set as wallpaper automatically
+    console.log('Setting as wallpaper...');
+    await setWallpaper(imagePath);
     
     // Add to history
     const history = store.get('imageHistory', []);
@@ -192,6 +180,9 @@ async function handleGenerateAffirmation() {
     return { success: false, error: error.message };
   }
 }
+
+// Export for use in other modules
+module.exports = { handleGenerateAffirmation };
 
 app.on('window-all-closed', (e) => {
   // Don't quit on window close - run in background

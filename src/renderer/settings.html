@@ -94,6 +94,7 @@
     <div class="setting-group">
       <label for="schedule">Generation Schedule</label>
       <select id="schedule">
+        <option value="*/5 * * * *">Every 5 minutes (for testing)</option>
         <option value="0 6 * * *">Daily at 6:00 AM</option>
         <option value="0 */12 * * *">Every 12 hours</option>
         <option value="0 */6 * * *">Every 6 hours</option>
@@ -108,7 +109,7 @@
     </div>
     
     <div class="button-group">
-      <button class="secondary" onclick="generateNow()">Generate Now</button>
+      <button class="secondary" onclick="generateNow()">Generate & Set Wallpaper</button>
       <button class="primary" onclick="saveSettings()">Save Changes</button>
     </div>
     
@@ -147,7 +148,7 @@
       try {
         const result = await ipcRenderer.invoke('generate-now');
         if (result.success) {
-          showMessage('New affirmation generated!', 'success');
+          showMessage('New affirmation wallpaper set!', 'success');
         } else {
           showMessage('Error: ' + result.error, 'error');
         }
